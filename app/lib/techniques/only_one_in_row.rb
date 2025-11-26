@@ -1,24 +1,13 @@
 module Techniques
   class OnlyOneInRow
+    include OnlyOneInSet
+
     PUZZLE_SIZE = 9
 
     def self.call(position, puzzle)
-      element_set = build_set(position, puzzle)
-      every_possibility = Hash.new([])
-      element_set.reject { |e| e.square.solved }.each do |elem|
-        elem.square.candidates.each { |c| every_possibility[c].push(elem.position) }
-      end
-
-      every_possibility.select { |_, v| v.length == 1 }.map do |pair|
-        { type: :solve, position: pair.second.first, value: pair.first }
-      end
-    end
-
-    private
-
-    def self.build_set(position, puzzle)
       set_start = position / PUZZLE_SIZE
-      (1..PUZZLE_SIZE).map { |i| puzzle.get!(set_start + i) }
+      row_set = (1..PUZZLE_SIZE).map { |i| puzzle.get!(set_start + i) }
+      self.only_one_in_set(row_set)
     end
   end
 end
