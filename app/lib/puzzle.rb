@@ -3,11 +3,12 @@ class Puzzle
 
   PUZZLE_SIZE = 9
   CUBE_SIZE = PUZZLE_SIZE / 3
-  EVERY_VALUE = Array.new(PUZZLE_SIZE) { |k| k + 1 }
+  EVERY_VALUE = Array.new(PUZZLE_SIZE) { |k| k + 1 }.freeze
 
   def initialize(input = [])
+    cpy = input.map(&:clone)
     @elements = Array.new(PUZZLE_SIZE * PUZZLE_SIZE) do |i|
-      Element.new(i, input.shift)
+      Element.new(i, cpy.shift)
     end
     @values = {
       row: {},
@@ -15,13 +16,13 @@ class Puzzle
       cube: {}
     }
 
-    raise new StandardError "Puzzle is not valid" unless valid?
+    raise StandardError.new("Puzzle is not valid") unless valid?
     generate_candidates
   end
 
   def get!(index)
-    raise new StandardError "Given index must be positive" if index.negative?
-    raise new StandardError "Given index must less than #{PUZZLE_SIZE * PUZZLE_SIZE}" if index >= PUZZLE_SIZE * PUZZLE_SIZE
+    raise StandardError.new("Given index must be positive") if index.negative?
+    raise StandardError.new("Given index (#{index}) must less than #{PUZZLE_SIZE * PUZZLE_SIZE}") if index >= PUZZLE_SIZE * PUZZLE_SIZE
 
     elements[index]
   end
@@ -36,19 +37,33 @@ class Puzzle
     true
   end
 
-  private
+  def generate_candidates(force = false)
+    @values = {
+      row: {},
+      column: {},
+      cube: {}
+    } if force
 
-  def generate_candidates
-    elements.each_with_index do |elem, i|
-      next if elem.square.solved
+    elements.reject { |elem| elem.square.solved }.each_with_index do |elem, i|
       values_from_row = values(:row, elem.row)
       values_from_column = values(:column, elem.column)
       values_from_cube = values(:cube, elem.cube)
-
       candidates = EVERY_VALUE - values_from_row - values_from_column - values_from_cube
       elem.square.candidates = candidates
     end
   end
+
+  def to_s
+    output = ""
+    elements.each_with_index do |elem, i|
+      x = elem.square.solved ? elem.square.value : " "
+      new_line = i.positive? && (i % PUZZLE_SIZE).zero? ? "\n" : ""
+      output = "#{output}#{new_line} #{x}"
+    end
+    output
+  end
+
+  private
 
   def values(type, i)
     return @values[type][i] if @values[type][i]
