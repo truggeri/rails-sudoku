@@ -13,7 +13,7 @@ module Techniques
         column = start_column + (i % CUBE_SIZE)
         puzzle.get!(row * PUZZLE_SIZE + column)
       end
-      self.only_one_in_set(cube_set)
+      self.only_one_in_set(cube_set, :cube)
     end
   end
 end
