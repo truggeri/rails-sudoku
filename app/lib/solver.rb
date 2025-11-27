@@ -8,7 +8,7 @@ class Solver
   end
 
   def solve
-    loop do
+    while puzzle.valid? do
       updates = Array.new(PUZZLE_SIZE * PUZZLE_SIZE) do |position|
         Techniques::OnlyOneCandidate.call(position, puzzle) \
           + Techniques::OnlyOneInRow.call(position, puzzle) \
@@ -17,7 +17,7 @@ class Solver
       end.flatten.compact
       break if updates.length.zero?
 
-      updates.each do |update|
+      updates.uniq { |u| u[:position] }.each do |update|
         puzzle.get!(update[:position]).square.solve!(update[:value]) if update[:type] == :solve
       end
       puzzle.generate_candidates(true)
