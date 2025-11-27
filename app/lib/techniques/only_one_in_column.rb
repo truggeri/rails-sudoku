@@ -7,7 +7,7 @@ module Techniques
     def self.call(position, puzzle)
       column_offset = position % PUZZLE_SIZE
       column_set = (0..PUZZLE_SIZE-1).map { |i| puzzle.get!(column_offset + i * PUZZLE_SIZE) }
-      self.only_one_in_set(column_set)
+      self.only_one_in_set(column_set, :column)
     end
   end
 end
